@@ -22,9 +22,9 @@ class build_ext_check_gcc(build_ext):
         _compile = c._compile
 
         def c_compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
-            if src in c_sources:
+            if src.endswith('.c'):
                 cc_args = cc_args + ['-std=c99']
-            elif src in cpp_sources:
+            elif src.endswith('.cpp'):
                 cc_args = cc_args + ['-std=c++11']
             return _compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
 
@@ -40,7 +40,7 @@ class build_ext_check_gcc(build_ext):
 ext_modules = [Extension('pycrfsuite._pycrfsuite',
     include_dirs=includes,
     language='c++',
-    sources=c_sources + cpp_sources,
+    sources=sorted(c_sources + cpp_sources),
 )]
 
 setup(
