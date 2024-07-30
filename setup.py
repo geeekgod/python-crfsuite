@@ -4,17 +4,9 @@ import sys
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
-sources = ['pycrfsuite/_pycrfsuite.cpp', 'pycrfsuite/trainer_wrapper.cpp']
-
-# crfsuite
-sources += glob.glob('crfsuite/lib/crf/src/*.c')
-sources += glob.glob('crfsuite/swig/*.cpp')
-
-sources += ['crfsuite/lib/cqdb/src/cqdb.c']
-sources += ['crfsuite/lib/cqdb/src/lookup3.c']
-
-# lbfgs
-sources += glob.glob('liblbfgs/lib/*.c')
+# Collect sources
+c_sources = glob.glob('crfsuite/lib/crf/src/*.c') + ['crfsuite/lib/cqdb/src/cqdb.c', 'crfsuite/lib/cqdb/src/lookup3.c']
+cpp_sources = ['pycrfsuite/_pycrfsuite.cpp', 'pycrfsuite/trainer_wrapper.cpp'] + glob.glob('crfsuite/swig/*.cpp') + glob.glob('liblbfgs/lib/*.c')
 
 includes = [
     'crfsuite/include/',
@@ -30,7 +22,10 @@ class build_ext_check_gcc(build_ext):
         _compile = c._compile
 
         def c_compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
-            cc_args = cc_args + ['-std=c99'] if src.endswith('.c') else cc_args
+            if src in c_sources:
+                cc_args = cc_args + ['-std=c99']
+            elif src in cpp_sources:
+                cc_args = cc_args + ['-std=c++11']
             return _compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
 
         if c.compiler_type == 'unix':
@@ -45,8 +40,7 @@ class build_ext_check_gcc(build_ext):
 ext_modules = [Extension('pycrfsuite._pycrfsuite',
     include_dirs=includes,
     language='c++',
-    sources=sorted(sources),
-    extra_compile_args=['-std=c++11'],
+    sources=c_sources + cpp_sources,
 )]
 
 setup(
