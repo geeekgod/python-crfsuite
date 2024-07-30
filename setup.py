@@ -24,12 +24,16 @@ class build_ext_check_gcc(build_ext):
         def c_compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
             if src.endswith('.c'):
                 cc_args = cc_args + ['-std=c99']
-            elif src.endswith('.cpp'):
+            return _compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+
+        def cpp_compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
+            if src.endswith('.cpp'):
                 extra_postargs = extra_postargs + ['-std=c++11']
             return _compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
 
         if c.compiler_type == 'unix':
             c._compile = c_compile
+            c.compile = cpp_compile
 
         elif c.compiler_type == "msvc":
             if sys.version_info[:2] < (3, 5):
