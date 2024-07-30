@@ -25,7 +25,7 @@ class build_ext_check_gcc(build_ext):
             if src.endswith('.c'):
                 cc_args = cc_args + ['-std=c99']
             elif src.endswith('.cpp'):
-                cc_args = cc_args + ['-std=c++11']
+                extra_postargs = extra_postargs + ['-std=c++11']
             return _compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
 
         if c.compiler_type == 'unix':
